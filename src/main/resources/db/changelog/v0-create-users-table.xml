@@ -1,0 +1,35 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <!-- Таблица users -->
+    <changeSet id="create-users-table" author="dev.mda" >
+        <createTable tableName="users" schemaName="card_schema" remarks="Основная таблица пользователей">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_users"/>
+            </column>
+
+            <column name="email" type="VARCHAR(255)" remarks="Уникальный email">
+                <constraints unique="true" nullable="false"/>
+            </column>
+
+            <column name="password" type="VARCHAR(255)" remarks="Хеш пароля">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Индекс для поиска по email -->
+        <createIndex tableName="users" indexName="idx_users_email" unique="true">
+            <column name="email"/>
+        </createIndex>
+
+        <sql dbms="postgresql">
+            COMMENT ON TABLE users IS 'Пользователи системы';
+            COMMENT ON COLUMN users.email IS 'Уникальный идентификатор пользователя';
+            COMMENT ON COLUMN users.password IS 'BCrypt хеш пароля';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

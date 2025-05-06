@@ -1,0 +1,39 @@
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/card_db?currentSchema=card_schema
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: card_schema  # Указание схемы для Hibernate
+        jdbc.lob.non_contextual_creation: true
+  liquibase:
+    change-log: classpath:db/changelog/master.xml
+    liquibase-schema: card_schema  # Правильное свойство для схемы Liquibase
+    parameters:
+      liquibaseSchemaName: card_schema  # Дополнительный параметр
+
+server:
+  port: 8080
+
+jwt:
+  secret: B7f2xKp9RvYq1tLm3wNzAeJhMkP5oXrC/S6cDvG8iHjN1lQwE4bTgZsO7uI0aFyVd9n+WzCxPq3BkUoKtS5Lm2g==   # Генерировать через SecureRandom
+  expiration-ms: 86400000 # 24 часа
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    doc-expansion: none
+  api-docs:
+    path: /v3/api-docs
+  packages-to-scan: com.example.demo.controller
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

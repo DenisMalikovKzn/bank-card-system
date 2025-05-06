@@ -1,0 +1,13 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <include file="db/changelog/v0-initial-setup.xml"/>
+    <include file="db/changelog/v0-create-roles-table.xml"/>
+    <include file="db/changelog/v0-create-users-table.xml"/>
+    <include file="db/changelog/v0-create-user-roles-table.xml"/>
+    <include file="db/changelog/v0-create-table-bank-card.xml"/>
+    <include file="db/changelog/v0-create-transfer-history-table.xml"/>
+</databaseChangeLog>

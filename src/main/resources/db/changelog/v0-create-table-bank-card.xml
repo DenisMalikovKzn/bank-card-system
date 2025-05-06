@@ -1,0 +1,57 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="create-bank-cards-table" author="dev.mda">
+        <createTable tableName="bank_cards" schemaName="card_schema" remarks="Bank cards storage">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_bank_cards"/>
+            </column>
+
+            <column name="encrypted_card_number" type="VARCHAR(500)" remarks="Encrypted card number">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT" remarks="Card owner reference">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="expiration_date" type="DATE" remarks="Card expiration date">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(20)" remarks="Card status" defaultValue="ACTIVE">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="balance" type="NUMERIC(19,4)" remarks="Current balance" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="bank_cards"
+                baseColumnNames="user_id"
+                constraintName="fk_bank_cards_users"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"
+                onUpdate="RESTRICT"/>
+
+        <createIndex
+                tableName="bank_cards"
+                indexName="idx_bank_cards_user"
+                unique="false">
+            <column name="user_id"/>
+        </createIndex>
+
+        <sql dbms="postgresql">
+            COMMENT ON COLUMN bank_cards.status IS 'Card status: ACTIVE, BLOCKED, EXPIRED';
+            COMMENT ON COLUMN bank_cards.encrypted_card_number IS 'AES-256 encrypted card number';
+            COMMENT ON COLUMN bank_cards.balance IS 'Stored with 4 decimal places precision';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

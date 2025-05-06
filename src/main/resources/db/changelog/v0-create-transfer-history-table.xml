@@ -1,0 +1,103 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="create-transfer-history-table" author="dev.mda">
+        <!-- Создание таблицы -->
+        <createTable tableName="transfer_history" schemaName="card_schema" remarks="История переводов между картами">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_transfer_history"/>
+            </column>
+
+            <column name="from_card_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="to_card_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="amount" type="NUMERIC(19,4)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="transaction_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="timestamp" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(20)" defaultValue="COMPLETED">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <!-- Внешние ключи -->
+        <addForeignKeyConstraint
+                baseTableName="transfer_history"
+                baseColumnNames="from_card_id"
+                constraintName="fk_transfer_history_from_card"
+                referencedTableName="bank_cards"
+                referencedColumnNames="id"
+                onDelete="RESTRICT"/>
+
+        <addForeignKeyConstraint
+                baseTableName="transfer_history"
+                baseColumnNames="to_card_id"
+                constraintName="fk_transfer_history_to_card"
+                referencedTableName="bank_cards"
+                referencedColumnNames="id"
+                onDelete="RESTRICT"/>
+
+        <!-- Индексы -->
+        <createIndex tableName="transfer_history" indexName="idx_transfer_from_card">
+            <column name="from_card_id"/>
+        </createIndex>
+
+        <createIndex tableName="transfer_history" indexName="idx_transfer_to_card">
+            <column name="to_card_id"/>
+        </createIndex>
+
+        <!-- Комментарии -->
+        <sql dbms="postgresql">
+            COMMENT ON TABLE transfer_history IS 'История транзакций между картами';
+            COMMENT ON COLUMN transfer_history.from_card_id IS 'Карта-источник перевода';
+            COMMENT ON COLUMN transfer_history.to_card_id IS 'Карта-получатель';
+            COMMENT ON COLUMN transfer_history.amount IS 'Сумма перевода (4 знака после запятой)';
+            COMMENT ON COLUMN transfer_history.transaction_date IS 'Дата совершения перевода';
+            COMMENT ON COLUMN transfer_history.status IS 'Статус: COMPLETED, FAILED, PENDING';
+            COMMENT ON COLUMN transfer_history.description IS 'Описание/комментарий к переводу';
+        </sql>
+    </changeSet>
+
+    <!-- Триггер для автоматической установки времени (опционально) -->
+    <changeSet id="transfer-history-triggers" author="your_name">
+        <sql dbms="postgresql"><![CDATA[
+            CREATE OR REPLACE FUNCTION update_transfer_timestamps()
+            RETURNS TRIGGER AS '
+            BEGIN
+              NEW.timestamp = CURRENT_TIMESTAMP;
+              RETURN NEW;
+            END;
+            ' LANGUAGE plpgsql;
+
+            CREATE TRIGGER trg_transfer_history_timestamp
+            BEFORE UPDATE ON transfer_history
+            FOR EACH ROW
+            EXECUTE FUNCTION update_transfer_timestamps();
+            ]]></sql>
+        <rollback>
+            DROP TRIGGER IF EXISTS trg_transfer_history_timestamp ON transfer_history;
+            DROP FUNCTION IF EXISTS update_transfer_timestamps();
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
